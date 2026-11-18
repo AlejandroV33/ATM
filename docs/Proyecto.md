@@ -52,7 +52,7 @@ El cajero automático funciona de manera autónoma las 24 horas
 
 2.1.1 Abastecer cajero.
 
-2.1.2 Notificar cuando el efectivo sea insuficiente.
+2.1.2 Notificar el estado de efectivo.
 
 2.2.1 Detectar fallas del cajero.
 
