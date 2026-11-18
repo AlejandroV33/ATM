@@ -1,5 +1,4 @@
 # Created by alejandrov at 12/11/26
-
 # language: es
 
 Característica: Notificar cuando el efectivo del cajero sea insuficiente
@@ -8,50 +7,49 @@ Característica: Notificar cuando el efectivo del cajero sea insuficiente
   Para coordinar su reabastecimiento con los responsables
 
   Antecedentes:
-    Dado que Bob es un operador autorizado registrado en el sistema
-    Y el cajero A está asignado a Bob
+    Dado que existe un operador autorizado registrado en el sistema
+    Y tiene asignado el cajero A
     Y el servicio de notificaciones está disponible
     Y el cajero A está activo
     Y el monto mínimo total definido es de 1000 dólares
-    Y la capacidad máxima del cajero A es de 5000 dólares
-    Y el cajero A contiene subceldas para billetes de distintas denominaciones
-    Y cada subcelda tiene un monto mínimo definido
+    Y el cajero A tiene las siguientes subceldas configuradas:
+      | tipo_billete | cantidad_maxima | monto_minimo |
+      | 5            | 200             | 100          |
+      | 10           | 200             | 200          |
+      | 20           | 100             | 200          |
 
-  Escenario: Notificar cuando el efectivo total está por debajo del mínimo
-    Dado que el cajero A tiene 1500 dólares disponibles
-    Cuando el efectivo total disminuye a 900 dólares
-    Entonces el sistema envía una notificación a Bob
-    Y la notificación indica que el cajero A tiene efectivo insuficiente
-    Y muestra el monto total disponible de 900 dólares
-
-  Escenario: Notificar cuando una subcelda alcanza su monto mínimo
-    Dado que la subcelda de billetes de 20 dólares tiene un monto mínimo de 200 dólares
-    Y la subcelda contiene 300 dólares
-    Cuando el efectivo de la subcelda disminuye a 200 dólares
-    Entonces el sistema envía una notificación a Bob
-    Y la notificación identifica la subcelda de billetes de 20 dólares
-    Y muestra el monto disponible de 200 dólares
-
-  Escenario: Notificar cuando una subcelda está por debajo del mínimo
-    Dado que la subcelda de billetes de 10 dólares tiene un monto mínimo de 100 dólares
-    Y la subcelda contiene 150 dólares
-    Cuando el efectivo de la subcelda disminuye a 90 dólares
-    Entonces el sistema envía una notificación a Bob
-    Y la notificación indica que la subcelda de billetes de 10 dólares tiene efectivo insuficiente
-    Y muestra el monto disponible de 90 dólares
-
-  Escenario: No notificar cuando el efectivo es suficiente
-    Dado que el cajero A tiene 3000 dólares disponibles
-    Y todas sus subceldas tienen efectivo por encima de sus montos mínimos
-    Cuando el efectivo total disminuye a 2500 dólares
-    Y todas las subceldas permanecen por encima de sus montos mínimos
-    Entonces el sistema no envía notificaciones de efectivo insuficiente a Bob
-
-  Escenario: Notificar cuando varias subceldas tienen efectivo insuficiente
-    Dado que la subcelda de billetes de 10 dólares está por debajo de su monto mínimo
-    Y la subcelda de billetes de 20 dólares está por debajo de su monto mínimo
+  Escenario: El efectivo total está por debajo del mínimo
+    Dado que las subceldas del cajero A contienen:
+      | tipo_billete | cantidad_actual |
+      | 5            | 100             |
+      | 10           | 50              |
+      | 20           | 25              |
+    Cuando se retiran 700 dólares del cajero A
+    Y se extraen 20 billetes de 10 dólares y 25 billetes de 20 dólares
+    Entonces el sistema envía una notificación al operador autorizado
+    Y la notificación indica que el cajero A tiene efectivo total insuficiente
+    Y muestra el mensaje
+      """
+      "Se requieren 100 billetes de 5 dólares, 170 billetes de 10 dólares y 100 billetes de 20 dólares para abastecer el cajero A"
+      """
+  Escenario: Una o varias subceldas alcanzan un nivel crítico
+    Dado que las subceldas del cajero A contienen:
+      | tipo_billete | cantidad_actual |
+      | 5            | 20              |
+      | 10           | 20              |
+      | 20           | 10              |
+    Cuando el sistema verifica el efectivo disponible por subcelda
+    Entonces el sistema envía una notificación al operador autorizado
+    Y la notificación identifica las subceldas que alcanzaron su monto mínimo
+    Y muestra el mensaje
+      """
+      "Se requieren 180 billetes de 5 dólares, 180 billetes de 10 dólares y 90 billetes de 20 dólares para abastecer el cajero A"
+      """
+  Escenario: El efectivo es suficiente
+    Dado que las subceldas del cajero A contienen:
+      | tipo_billete | cantidad_actual |
+      | 5            | 100             |
+      | 10           | 100             |
+      | 20           | 50              |
     Cuando el sistema verifica el efectivo disponible
-    Entonces el sistema envía una notificación a Bob
-    Y la notificación identifica ambas subceldas
-    Y muestra el monto disponible de cada una
-
+    Entonces el sistema no envía notificaciones de efectivo insuficiente al operador autorizado
